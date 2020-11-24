@@ -10,3 +10,5 @@
 
 hello joono
 hello 
+안녕 주노
+안녕 쥬노
