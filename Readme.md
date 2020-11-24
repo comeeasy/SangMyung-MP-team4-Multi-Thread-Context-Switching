@@ -9,6 +9,7 @@
     노경민
 
 hello joono
+hello 노경민
 hello 
 안녕 주노
 안녕 쥬노
