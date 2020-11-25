@@ -44,26 +44,6 @@ extern unsigned int thread0_stack[];
 extern void thread0_function(void);
 ...
 
-extern int tid_current;         // current thread's id
-
-extern TCB *tcb_current;        // current thread's tcb
-extern TCB *tcb_next;           // next thread's tcb
-
-// ======================================================================
-
-extern void create_thread(TCB * tcb, void (*function) (void),
-                          unsigned int *sp);
-extern void SysTick_init(int hz);
-
-// ======================================================================
-// Thread stacks and functions.
-
-extern unsigned int thread0_stack[];
-...
-
-extern void thread0_function(void);
-...
-
 #endif
 
 // ======================================================================

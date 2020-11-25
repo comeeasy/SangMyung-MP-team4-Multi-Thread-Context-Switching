@@ -43,7 +43,10 @@ int main(void)
   tid_current = 0;
   tcb_current = &tcb_array[0];
   tcb_current->state = STATE_RUN;
+  tcb_current->state = STATE_RUN;
+  
   ...
+
   asm volatile ("msr psp, %0"::"r" (tcb_current->sp + (16 * 4)):"sp");
 
   // Init 100hz SysTick for multi threading.
@@ -88,8 +91,6 @@ void SysTick_init(int hz)
 {
   // For 100Hz timer: processor clock Hz / 100 - 1
   *(volatile unsigned int *) SYST_RVR = 120000000 / hz - 1;
-  // set 0 first
-    *(volatile unsigned int *) SYST_RVR = 120000000 / hz - 1;
   // set 0 first
   *(volatile unsigned int *) SYST_CVR = 0;
   // 0x7 means use processor clock, generate exception, enable counter.

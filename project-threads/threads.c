@@ -45,9 +45,6 @@ int main(void)
   // Pretend the first thread is running.
   tid_current = 0;
   tcb_current = &tcb_array[0];
-
-    tid_current = 0;
-  tcb_current = &tcb_array[0];
   tcb_current->state = STATE_RUN;
   asm volatile ("msr psp, %0"::"r" (tcb_current->sp + (16 * 4)):"sp");
 
@@ -89,6 +86,90 @@ void SysTick_init(int hz)
   *(volatile unsigned int *) SYST_CVR = 0;
   // 0x7 means use processor clock, generate exception, enable counter.
   *(volatile unsigned int *) SYST_CSR = 0x7;
+}
+
+// ======================================================================
+
+unsigned int thread0_stack[SIZE_OF_STACK];
+
+void thread0_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 3);
+    printf("thread0: time=%d ", (tick / 100));
+    __enable_irq();
+  }
+}
+
+// ======================================================================
+
+unsigned int thread1_stack[SIZE_OF_STACK];
+
+void thread1_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 4);
+    printf("thread1: time=%d ", (tick / 100));
+    __enable_irq();
+  }
+}
+
+// ======================================================================
+
+unsigned int thread2_stack[SIZE_OF_STACK];
+
+void thread2_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 5);
+    printf("thread2: time=%d ", (tick / 100));
+    __enable_irq();
+  }
+}
+
+// ======================================================================
+
+unsigned int thread3_stack[SIZE_OF_STACK];
+
+void thread3_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 6);
+    printf("thread3: time=%d ", (tick / 100));
+    __enable_irq();
+  }
+}
+
+// ======================================================================
+
+unsigned int thread4_stack[SIZE_OF_STACK];
+
+void thread4_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 7);
+    printf("thread4: time=%d ", (tick / 100));
+    __enable_irq();
+  }
+}
+
+// ======================================================================
+
+unsigned int thread5_stack[SIZE_OF_STACK];
+
+void thread5_function(void)
+{
+  for (;;) {
+    __disable_irq();
+    putgoto(0, 8);
+    printf("thread5: time=%d ", (tick / 100));
+    __enable_irq();
+  }
 }
 
 // ======================================================================
