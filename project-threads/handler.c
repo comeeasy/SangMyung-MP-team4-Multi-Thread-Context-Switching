@@ -82,7 +82,7 @@ void SysTick_Handler(void)
 
   // Make PendSV exception pending.
   /* ICSR의 bit[28] 을 set하면 된다.*/
-  *(volatile unsigned int *) SCB_ICSR = SCB_ICSR |= 0x10000000;
+  *(volatile unsigned int *) SCB_ICSR |= 0x10000000;
 }
 
 // ======================================================================
