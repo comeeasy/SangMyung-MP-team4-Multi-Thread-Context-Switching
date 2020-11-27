@@ -68,20 +68,27 @@ int main(void)
 
 void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 {
+  /* exception 발생 시 하드웨어가 push함 시작 */
   *(--sp) = 0x01000000;                 // xpsr (Thumb=1)
   *(--sp) = (unsigned int) function;    // pc(=r15)
   *(--sp) = 0x00000000;                 // lr(=r14)
+  *(--sp) = 0x00000000;                 // r12
+  *(--sp) = 0x00000000;                 // r3
+  *(--sp) = 0x00000000;                 // r2
+  *(--sp) = 0x00000000;                 // r1
+  *(--sp) = 0x00000000;                 // r0
+  /* 끝 */
 
-  /* pendSV를 보면 r4 - r11까지 load하므로 그렇게 넣음 */
-
-  *(--sp) = 0x00000000;                 // r4
-  *(--sp) = 0x00000000;                 // r5
-  *(--sp) = 0x00000000;                 // r6
-  *(--sp) = 0x00000000;                 // r7
-  *(--sp) = 0x00000000;                 // r8
-  *(--sp) = 0x00000000;                 // r9
-  *(--sp) = 0x00000000;                 // r10
+  /* exception 발생 시 PendSV handler가 push함 시작 */
   *(--sp) = 0x00000000;                 // r11
+  *(--sp) = 0x00000000;                 // r10
+  *(--sp) = 0x00000000;                 // r9
+  *(--sp) = 0x00000000;                 // r8
+  *(--sp) = 0x00000000;                 // r7
+  *(--sp) = 0x00000000;                 // r6
+  *(--sp) = 0x00000000;                 // r5
+  *(--sp) = 0x00000000;                 // r4
+  /* 끝 */
 
   tcb->sp = sp;
   tcb->function = function;
