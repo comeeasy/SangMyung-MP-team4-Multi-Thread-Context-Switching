@@ -25,7 +25,7 @@ int main(void)
   putclear();
   putgoto(0, 0);
   printf("========================================\n");
-  printf("Multi-threading demo\n");
+  printf("Multi-threading joono\n");
   printf("========================================");
   putgoto(0, 9);
   printf("========================================");
@@ -34,18 +34,23 @@ int main(void)
   asm volatile ("msr control, %0"::"r" (control):);
 
   // Enable 8-byte(=2-word) stack align.
-  *(volatile unsigned int *) SCB_CCR =
-      (*(volatile unsigned int *) SCB_CCR) | (0x01 << 9);
+  *(volatile unsigned int *) SCB_CCR = (*(volatile unsigned int *) SCB_CCR) | (0x01 << 9);
 
   // Create all threads.
-  create_thread(&tcb_array[0], thread0_function,
-                &thread0_stack[SIZE_OF_STACK - 1]);
-  ...
+  create_thread(&tcb_array[0], thread0_function, &thread0_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[1], thread1_function, &thread1_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[2], thread2_function, &thread2_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[3], thread3_function, &thread3_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[4], thread4_function, &thread4_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[5], thread5_function, &thread5_stack[SIZE_OF_STACK - 1]);
+  
 
   // Pretend the first thread is running.
   tid_current = 0;
   tcb_current = &tcb_array[0];
   tcb_current->state = STATE_RUN;
+
+  /* 아래 무슨 기능을 하는지 모르겠음 */
   asm volatile ("msr psp, %0"::"r" (tcb_current->sp + (16 * 4)):"sp");
 
   // Init 100hz SysTick for multi threading.
@@ -63,17 +68,24 @@ int main(void)
 
 void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 {
-  *(--sp) = 0x01000000;         // xpsr (Thumb=1)
+  *(--sp) = 0x01000000;                 // xpsr (Thumb=1)
   *(--sp) = (unsigned int) function;    // pc(=r15)
-  *(--sp) = 0x00000000;         // lr(=r14)
-  ...
+  *(--sp) = 0x00000000;                 // lr(=r14)
 
-  *(--sp) = 0x00000000;         // r11
-  ...
+  /* pendSV를 보면 r4 - r11까지 load하므로 그렇게 넣음 */
 
-  tcb->sp = ...
-  tcb->function = ...
-  tcb->state = ...
+  *(--sp) = 0x00000000;                 // r4
+  *(--sp) = 0x00000000;                 // r5
+  *(--sp) = 0x00000000;                 // r6
+  *(--sp) = 0x00000000;                 // r7
+  *(--sp) = 0x00000000;                 // r8
+  *(--sp) = 0x00000000;                 // r9
+  *(--sp) = 0x00000000;                 // r10
+  *(--sp) = 0x00000000;                 // r11
+
+  tcb->sp = sp;
+  tcb->function = function;
+  tcb->state = STATE_READY;
 }
 
 // ======================================================================
@@ -89,7 +101,7 @@ void SysTick_init(int hz)
 }
 
 // ======================================================================
-
+/* IRQ : Interrupt Request */
 unsigned int thread0_stack[SIZE_OF_STACK];
 
 void thread0_function(void)

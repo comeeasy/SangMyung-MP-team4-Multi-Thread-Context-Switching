@@ -31,18 +31,26 @@ extern TCB *tcb_next;           // next thread's tcb
 
 // ======================================================================
 
-extern void create_thread(TCB * tcb, void (*function) (void),
-                          unsigned int *sp);
+extern void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp);
 extern void SysTick_init(int hz);
 
 // ======================================================================
 // Thread stacks and functions.
 
 extern unsigned int thread0_stack[];
-...
+extern unsigned int thread1_stack[];
+extern unsigned int thread2_stack[];
+extern unsigned int thread3_stack[];
+extern unsigned int thread4_stack[];
+extern unsigned int thread5_stack[];
 
 extern void thread0_function(void);
-...
+extern void thread1_function(void);
+extern void thread2_function(void);
+extern void thread3_function(void);
+extern void thread4_function(void);
+extern void thread5_function(void);
+
 
 #endif
 
