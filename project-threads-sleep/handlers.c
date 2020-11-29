@@ -45,17 +45,36 @@ void SysTick_Handler(void)
   // Increment tick.
   tick += 1;
 
-  /* 현재 thread는 잠깐 대기하고 다음 thread가 current thread가 되게 함 */
-  tcb_array[tid_current].state = STATE_READY;
+  /* thread1 - thread5까지 1tick씩 감소 시키는데 만약 sleep_tick이 0이라면 READY */
+  for(int threadNum=1; threadNum<6; ++threadNum) {
+    tcb_array[threadNum].sleep_tick -= 1;
 
-  /* tid_current를 0, 1, 2, 3, 4, 5, 6 으로 순환한다.                                          */
-  /* 이때 tid_current가 1부터 5사이의 값일때는 해당 thread가 WAIT상태인지 READY상태인지 파악한다. */
-  /* WAIT상태라면 tid_current를 다음 값으로 바꾸고 READY상태라면 다음 thread로 선정한다.          */
-  tid_current = (tid_current + 1) % 7;
-  if(tid_current > 0 && tid_current < 6) {
-    if(tcb_array[tid_current].state == READY)
+    if(tcb_array[threadNum].sleep_tick == 0) {
+      tcb_array[threadNum].state = STATE_READY;
+    }
   }
-  ...
+
+  /* current thread의 상태를 idle thread라면 바로 STATE_READY */
+  /* 그렇지 않으면 WAIT상태로 바꾼다. 1 - 5 thread는 무조건 wait하게 돼있기 때문이다.*/
+  /* thread0, 6 은 idle thread */
+  if(tid_current == 0 || tid_current == 6) {
+    tcb_array[tid_current].state = STATE_READY;  
+  }
+  else {
+    tcb_array[tid_current].state = WAIT;  
+  }
+
+  /* tid_current를 0, 1, 2, 3, 4, 5, 6 으로 순환한다.    */
+  /* 이때 tcb_array[tid_current].state == STATE_READY를 만날때까지 순환한다. */
+  while(tcb_array[tid_current].state != STATE_READY) {
+    tid_current = (tid_current + 1) % 7;
+  }
+  
+  /* 다음 tcb의 state를 run 상태로 만듬 */
+  tcb_array[tid_current].state = STATE_RUN;
+
+  // Update tcb_next for PendSV handler.
+  tcb_next = &tcb_array[tid_current];
 
   // Make PendSV exception pending.
   /* ICSR의 bit[28]을 set하면 된다. */

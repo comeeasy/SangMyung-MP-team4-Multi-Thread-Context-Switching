@@ -98,9 +98,8 @@ void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 }
 // ======================================================================
 
-void sleep_thread(unsigned int ticks)
-{
-  ...
+void sleep_thread(unsigned int ticks) {
+  tcb_current->sleep_tick = ticks;
 }
 
 // ======================================================================

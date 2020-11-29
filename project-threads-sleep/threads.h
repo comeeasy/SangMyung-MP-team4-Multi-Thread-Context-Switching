@@ -30,9 +30,7 @@ typedef struct tcb_struct {
 // ======================================================================
 
 extern TCB tcb_array[];         // the tcb array
-
 extern int tid_current;         // current thread's id
-
 extern TCB *tcb_current;        // current thread's tcb
 extern TCB *tcb_next;           // next thread's tcb
 
