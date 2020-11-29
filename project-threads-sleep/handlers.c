@@ -43,12 +43,47 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   // Increment tick.
-  tick = ...
+  tick += 1;
 
+  /* 현재 thread는 잠깐 대기하고 다음 thread가 current thread가 되게 함 */
+  tcb_array[tid_current].state = STATE_READY;
+
+  /* tid_current를 0, 1, 2, 3, 4, 5, 6 으로 순환한다.                                          */
+  /* 이때 tid_current가 1부터 5사이의 값일때는 해당 thread가 WAIT상태인지 READY상태인지 파악한다. */
+  /* WAIT상태라면 tid_current를 다음 값으로 바꾸고 READY상태라면 다음 thread로 선정한다.          */
+  tid_current = (tid_current + 1) % 7;
+  if(tid_current > 0 && tid_current < 6) {
+    if(tcb_array[tid_current].state == READY)
+  }
   ...
 
   // Make PendSV exception pending.
-  *(volatile unsigned int *) SCB_ICSR = ...
+  /* ICSR의 bit[28]을 set하면 된다. */
+  *(volatile unsigned int *) SCB_ICSR |= 0x10000000;
+}
+
+void SysTick_Handler(void)
+{
+  // Increment tick.
+  tick = tick + 1;
+
+  // Update tid_current and thread state.
+
+  /* 현재 thread는 잠깐 대기하고 다음 thread가 current thread가 되게 함 */
+  tcb_array[tid_current].state = STATE_READY;
+
+  /* 0, 1, 2, 3, 4, 5 가 반복되도록 작성 */
+  tid_current = (tid_current + 1) % 6;
+
+  /* 다음 tcb의 state를 run 상태로 만듬 */
+  tcb_array[tid_current].state = STATE_RUN;
+
+  // Update tcb_next for PendSV handler.
+  tcb_next = &tcb_array[tid_current];
+
+  // Make PendSV exception pending.
+  /* ICSR의 bit[28] 을 set하면 된다.*/
+  *(volatile unsigned int *) SCB_ICSR |= 0x10000000;
 }
 
 // ======================================================================
