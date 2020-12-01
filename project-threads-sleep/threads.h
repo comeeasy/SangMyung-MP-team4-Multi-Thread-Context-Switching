@@ -36,8 +36,7 @@ extern TCB *tcb_next;           // next thread's tcb
 
 // ======================================================================
 
-extern void create_thread(TCB * tcb, void (*function) (void),
-                          unsigned int *sp);
+extern void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp);
 extern void SysTick_init(int hz);
 
 /* 함수void sleep_thread(unsigned int ticks) 추가 */
