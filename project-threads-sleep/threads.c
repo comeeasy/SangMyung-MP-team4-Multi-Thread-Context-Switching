@@ -46,8 +46,6 @@ int main(void)
   tid_current = 0;
   tcb_current = &tcb_array[0];
   tcb_current->state = STATE_RUN;
-  
-  /* 각 thread0의 sleep_tick은 0이다. */
   tcb_current->sleep_tick = 0;
 
   asm volatile ("msr psp, %0"::"r" (tcb_current->sp + (16 * 4)):"sp");
@@ -99,7 +97,15 @@ void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 // ======================================================================
 
 void sleep_thread(unsigned int ticks) {
-  tcb_current->sleep_tick = ticks-1;
+  /* NO_OF_THREADS는 thread0가 시작되기 위한 최소한의 tick이다. */
+  /* tid_current를 더해준 이유는 적어도 thread1이 먼저 시작되기 위함이다. */
+  unsigned int target_tick = (tick/100)*100 + ticks + NO_OF_THREADS + tid_current;
+
+  while(tick < target_tick) {
+    tcb_current->state = WAIT;
+  }
+
+  tcb_current->state = STATE_RUN;
 }
 
 // ======================================================================

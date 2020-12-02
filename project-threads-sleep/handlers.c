@@ -45,48 +45,7 @@ void SysTick_Handler(void)
   // Increment tick.
   tick += 1;
 
-  /* thread1 - thread5까지 1tick씩 감소 시키는데 만약 sleep_tick이 0이라면 READY */
-  for(int threadNum=1; threadNum<6; ++threadNum) {
-    TCB* this = &tcb_array[threadNum];
-    /* state가 WAIT일 때만 sleep_tick을 감소시킨다. */
-    if(this->state == WAIT) {
-      this->sleep_tick -= 1;  
-
-      /* sleep_tick이 WAIT상태였다가 0이 되면 STATE_READY */
-      if(this.sleep_tick == 0) {
-        this->state = STATE_READY;
-      }
-    }
-  }
-
-  /* current thread의 상태를 idle thread라면 바로 STATE_READY */
-  /* 그렇지 않으면 WAIT상태로 바꾼다. 1 - 5 thread는 무조건 wait하게 돼있기 때문이다.*/
-  /* thread0, 6 은 idle thread */
-
-  if(tcb_current->sleep_tick == 0) {
-    tcb_current->state = STATE_READY;
-  }
-  else {
-    tcb_current->state = WAIT;
-  }
   
-  //if(tid_current == 0 || tid_current == 6) {
-  //  tcb_array[tid_current].state = STATE_READY;  
-  //}
-  //else if(tid_current > 0 && tid_current < 6){
-  //  tcb_array[tid_current].state = WAIT;  
-  //} /* 그렇지 않으면 에러 */
-  //else {
-  //  printf("tid_error\n");
-  //}
-  
-
-  /* tid_current를 0, 1, 2, 3, 4, 5, 6 으로 순환한다.    */
-  /* 이때 tcb_array[tid_current].state == STATE_READY를 만날때까지 순환한다. */
-  while(tcb_array[tid_current].state != STATE_READY) {
-    tid_current = (tid_current + 1) % 7;
-  }
-
   /* 다음 thread의 state가 READY이므로 한 칸 더 진행 */
   tid_current = (tid_current + 1) % 7;
   
@@ -107,13 +66,11 @@ void SysTick_Handler(void)
   // Increment tick.
   tick = tick + 1;
 
-  // Update tid_current and thread state.
-
   /* 현재 thread는 잠깐 대기하고 다음 thread가 current thread가 되게 함 */
   tcb_array[tid_current].state = STATE_READY;
 
   /* 0, 1, 2, 3, 4, 5 가 반복되도록 작성 */
-  tid_current = (tid_current + 1) % 6;
+  tid_current = (tid_current + 1) % 7;
 
   /* 다음 tcb의 state를 run 상태로 만듬 */
   tcb_array[tid_current].state = STATE_RUN;
