@@ -99,12 +99,11 @@ void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 void sleep_thread(unsigned int ticks) {
   /* NO_OF_THREADS는 thread0가 시작되기 위한 최소한의 tick이다. */
   /* tid_current를 더해준 이유는 적어도 thread1이 먼저 시작되기 위함이다. */
-  unsigned int target_tick = (tick/100)*100 + ticks + NO_OF_THREADS + tid_current;
+  tcb_current->sleep_tick = (tick/100)*100 + ticks + NO_OF_THREADS + tid_current - tick;
 
-  while(tick < target_tick) {
-    tcb_current->state = WAIT;
-  }
-
+  tcb_current->state = WAIT;
+  /* sleep_tick이  0이 아니라면 대기 */
+  while(tick < target_tick);
   tcb_current->state = STATE_RUN;
 }
 
