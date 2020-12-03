@@ -31,21 +31,22 @@ int main(void)
   asm volatile ("msr control, %0"::"r" (control):);
 
   // Enable 8-byte(=2-word) stack align.
-  *(volatile unsigned int *) SCB_CCR =
-      (*(volatile unsigned int *) SCB_CCR) | (0x01 << 9);
+  *(volatile unsigned int *) SCB_CCR = (*(volatile unsigned int *) SCB_CCR) | (0x01 << 9);
 
   // Create all threads.
-  create_thread(&tcb_array[0], thread0_function,
-                &thread0_stack[SIZE_OF_STACK - 1]);
-  ...
+  create_thread(&tcb_array[0], thread0_function, &thread0_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[1], thread1_function, &thread1_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[2], thread2_function, &thread2_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[3], thread3_function, &thread3_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[4], thread4_function, &thread4_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[5], thread5_function, &thread5_stack[SIZE_OF_STACK - 1]);
+  create_thread(&tcb_array[6], thread6_function, &thread6_stack[SIZE_OF_STACK - 1]);
 
   // Pretend the first thread is running.
   tid_current = 0;
   tcb_current = &tcb_array[0];
   tcb_current->state = STATE_RUN;
-  tcb_current->state = STATE_RUN;
-  
-  ...
+  tcb_current->sleep_tick = 0;
 
   asm volatile ("msr psp, %0"::"r" (tcb_current->sp + (16 * 4)):"sp");
 
@@ -64,25 +65,46 @@ int main(void)
 
 void create_thread(TCB * tcb, void (*function) (void), unsigned int *sp)
 {
-  *(--sp) = 0x01000000;         // xpsr (Thumb=1)
+  /* exception 발생 시 하드웨어가 push함 시작 */
+  *(--sp) = 0x01000000;                 // xpsr (Thumb=1)
   *(--sp) = (unsigned int) function;    // pc(=r15)
-  *(--sp) = 0x00000000;         // lr(=r14)
-  ...
+  *(--sp) = 0x00000000;                 // lr(=r14)
+  *(--sp) = 0x00000000;                 // r12
+  *(--sp) = 0x00000000;                 // r3
+  *(--sp) = 0x00000000;                 // r2
+  *(--sp) = 0x00000000;                 // r1
+  *(--sp) = 0x00000000;                 // r0
+  /* 끝 */
 
-  *(--sp) = 0x00000000;         // r11
-  ...
+  /* exception 발생 시 PendSV handler가 push함 시작 */
+  *(--sp) = 0x00000000;                 // r11
+  *(--sp) = 0x00000000;                 // r10
+  *(--sp) = 0x00000000;                 // r9
+  *(--sp) = 0x00000000;                 // r8
+  *(--sp) = 0x00000000;                 // r7
+  *(--sp) = 0x00000000;                 // r6
+  *(--sp) = 0x00000000;                 // r5
+  *(--sp) = 0x00000000;                 // r4
+  /* 끝 */
 
-  tcb->sp = ...
-  tcb->function = ...
-  tcb->state = ...
-  ...
+  tcb->sp = sp;
+  tcb->function = function;
+  tcb->state = STATE_READY;
+
+  /* sleep tick의 초기값은 0 */
+  tcb->sleep_tick = 0;
 }
-
 // ======================================================================
 
-void sleep_thread(unsigned int ticks)
-{
-  ...
+void sleep_thread(unsigned int ticks) {
+  /* NO_OF_THREADS는 thread0가 시작되기 위한 최소한의 tick이다. */
+  /* tid_current를 더해준 이유는 적어도 thread1이 먼저 시작되기 위함이다. */
+  tcb_current->sleep_tick = (tick/100)*100 + ticks + NO_OF_THREADS + tid_current - tick;
+
+  tcb_current->state = WAIT;
+  /* sleep_tick이  0이 아니라면 대기 */
+  while(tick < target_tick);
+  tcb_current->state = STATE_RUN;
 }
 
 // ======================================================================
