@@ -103,7 +103,7 @@ void sleep_thread(unsigned int ticks) {
 
   tcb_current->state = WAIT;
   /* sleep_tick이  0이 아니라면 대기 */
-  while(tick < target_tick);
+  while(tcb_current->sleep_tick);
   tcb_current->state = STATE_RUN;
 }
 

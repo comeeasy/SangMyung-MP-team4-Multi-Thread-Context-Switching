@@ -24,7 +24,7 @@ typedef struct tcb_struct {
   unsigned int state;           // thread state (RUN, READY, ...)
 
   /* TCB에 sleep tick 저장 변수 추가 */
-  unsigned int sleep_tick;
+  volatile unsigned int sleep_tick;
 } TCB;
 
 // ======================================================================
